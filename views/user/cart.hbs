@@ -1,0 +1,33 @@
+<div class="container">
+
+<div >
+<div class="row mt-4">
+    <a href="/admin/add-product" class="btn btn-success ml-auto">Add product</a>
+</div>
+<table class="table mt-5">
+  <thead>
+    <tr>
+      <th scope="col">Image</th>
+      <th scope="col">Tittle</th>
+      <th scope="col">catagory</th>
+      <th scope="col">Count</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each cartProducts}}
+    <tr>
+      <th scope="row">
+        <img src="/product-images/{{this._id}}.jpg" width="70px" alt="">
+      </th>
+      <td>{{this.Name}}</td>
+      <td>{{this.Category}}</td>
+      <td><button class="btn btn-primary">-</button>1<button class="btn btn-primary">+</button></td>
+      <td><a href="" class="btn btn-danger">Remove</a></td>
+    </tr>
+    {{/each}}
+    
+  </tbody>
+</table>
+</div>
+</div>
