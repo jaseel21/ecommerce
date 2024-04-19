@@ -60,21 +60,38 @@ module.exports={
     addToCart:(proId,userId)=>{
         const uId= new ObjectId(userId)
         const productId=new ObjectId(proId)
+        let productsObj={
+            item:productId,
+            quantity:1
+        }
         return new Promise(async(resolve,reject)=>{
             let cart=await db.get().collection(collection.CART_COLLECTION).findOne({userId:uId})
             if(cart){
-                db.get().collection(collection.CART_COLLECTION).updateOne({userId:uId},
-                {
-                    $push:{products:productId}
-                }).then(()=>{
-                    resolve()
-                })
+                let proExist=cart.products.findIndex(product=> product.item==proId)
+                console.log(proExist);
+                if(proExist!==-1){
+
+                    db.get().collection(collection.CART_COLLECTION).updateOne({"products.item":productId},
+                    {
+                        $inc:{"products.$.quantity":1}
+                    }).then(()=>{
+                        resolve()
+                    })
+                }else{
+                    db.get().collection(collection.CART_COLLECTION).updateOne({userId:uId},{
+                        $push:{products:productsObj}
+                    }).then(()=>{
+                        resolve()
+                    })
+                }
 
             }else{
                 db.get().collection(collection.CART_COLLECTION).insertOne(
                     {
-                        userId:uId,
-                        products:[productId]
+                      userId:uId,
+                      products:[
+                        productsObj
+                      ]
                     }
                 ).then(()=>{
                     resolve()
@@ -100,7 +117,7 @@ module.exports={
                            {
                                $match:{
                                    $expr:{
-                                       $in:['$_id','$$proList']
+                                       $in:['$_id','$$proList.item']
                                    }
                                }
                            }
@@ -110,6 +127,7 @@ module.exports={
                    }
                 }
             ]).toArray()
+            
             resolve(cartItems[0].cartItems)
         })
     },
@@ -118,11 +136,11 @@ module.exports={
             const objectUID=new ObjectId(uId)
             let cart= await db.get().collection(collection.CART_COLLECTION).findOne({userId:objectUID});
             if(cart){
-
                 let cartCount=cart.products.length;
                
                 resolve(cartCount)
             }
+            resolve()
         })
     }
 }

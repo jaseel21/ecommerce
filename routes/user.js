@@ -14,15 +14,18 @@ const varifyLogin=(req,res,next)=>{
 }
 
 router.get('/', function(req, res, next) {
+  console.log('called /');
   let user=req.session.user
 
 console.log(user);
   if(user){
+    console.log('in / if ');
 
     let cartCount=productHelpers.cartCount(user._id).then((count)=>{
 
       console.log(cartCount);
       productHelpers.getAllProducts().then((products)=>{
+        console.log(user.Name);
         
         res.render('user/view-products', { products ,user,count});
       })
@@ -50,16 +53,29 @@ router.get('/signup',function(req,res){
   res.render('user/signup')
 })
 
-router.post('/signup',function(req,res){
-  userHelpers.doSignup(req.body,(response)=>{
-    req.session.user=response
-    res.redirect('/')
+router.post('/signup',(req,res)=>{
+  console.log('entered');
+  userHelpers.doSignup(req.body).then((response)=>{
     console.log(response);
+    req.session.loggedIn=true
+    req.session.user=response
+    
+    if(req.session.user){
+     
+     
+      res.redirect("/")
+      console.log('if case');
+    }else{
+      console.log('else case');
+      res.redirect('/signup')
+    }
   })
 })
 
+
 router.post('/login',function(req,res){
   userHelpers.doLogin(req.body).then((response)=>{
+    console.log(req.body);
    console.log(response);
    req.session.loggedIn=response.status
    if(response.status){
@@ -82,7 +98,8 @@ router.get('/logout',(req,res)=>{
 router.get('/cart',varifyLogin,async(req,res)=>{
   let cartProducts=await productHelpers.getCartProducts(req.session.user._id)
   console.log(cartProducts);
-res.render('user/cart',{cartProducts})
+  let user=req.session.user
+res.render('user/cart',{cartProducts,user})
 })
 
 router.get('/add-to-cart/:id',(req,res)=>{

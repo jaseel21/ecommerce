@@ -5,20 +5,29 @@ const bcrypt=require('bcrypt')
 
 
 module.exports={
-    doSignup:async(user,callback)=>{
-        user.password=await bcrypt.hash(user.password,10)
-        const result =await db.get().collection(collection.USER_COLLECTION).insertOne(user)
+    doSignup:(user)=>{
+        console.log(user);
+        
 
-        callback(result)
+        return new Promise(async(resolve,reject)=>{
+            user.Password=await bcrypt.hash(user.Password,10)
+            db.get().collection(collection.USER_COLLECTION).insertOne(user).then((data)=>{
+
+
+               resolve(user)
+            })
+    
+        })
     },
+   
 
     doLogin:(user)=>{
         return new Promise((resolve,reject)=>{
             let response={}
-            db.get().collection(collection.USER_COLLECTION).findOne({email:user.email}).then((data)=>{
+            db.get().collection(collection.USER_COLLECTION).findOne({Email:user.Email}).then((data)=>{
               
                 if(data){
-                    bcrypt.compare(user.password,data.password).then((status)=>{
+                    bcrypt.compare(user.Password,data.Password).then((status)=>{
                         
                         if(status){
                             response.status=true
