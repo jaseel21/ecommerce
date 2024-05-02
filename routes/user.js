@@ -111,5 +111,23 @@ router.get('/add-to-cart/:id',(req,res)=>{
 
 })
 
+router.post('/change-quantity',(req,res,next)=>{
+  console.log(req.body);
+  productHelpers.chacgeProQuantity(req.body).then((resolve)=>{
+
+  })
+  productHelpers.newQuantity(req.body).then((resolve)=>{
+    res.json(resolve)
+  })
+
+})
+
+router.post("/remove-cart-product",(req,res)=>{
+  console.log(req.body);
+  productHelpers.removeCartProduct(req.body).then((resolve)=>{
+
+  })
+})
+
 
 module.exports = router;

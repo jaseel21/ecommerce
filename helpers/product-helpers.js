@@ -108,27 +108,32 @@ module.exports={
                     $match:{userId:objectUID}
                 },
                 {
-    
+                    $unwind:"$products"
+                },
+                {
+                    $project:{
+                       item:"$products.item",
+                       quantity:"$products.quantity"
+                    }
+                },
+                {
                     $lookup:{
-                       from:collection.PRODUCTS_COLLECTION,
-                       let:{proList:'$products'},
-                       
-                       pipeline:[
-                           {
-                               $match:{
-                                   $expr:{
-                                       $in:['$_id','$$proList.item']
-                                   }
-                               }
-                           }
-                       ],
-                       as:'cartItems'
-       
-                   }
+                        from:collection.PRODUCTS_COLLECTION,
+                        localField:"item",
+                        foreignField:"_id",
+                        as:"product"
+                    }
+                },
+                {
+                    $project:{
+                        item:1,quantity:1,product:{$arrayElemAt:['$product',0]}
+                    }
                 }
+
+                
             ]).toArray()
-            
-            resolve(cartItems[0].cartItems)
+            console.log(cartItems);
+            resolve(cartItems)
         })
     },
     cartCount:(uId)=>{
@@ -142,5 +147,66 @@ module.exports={
             }
             resolve()
         })
+    },
+    chacgeProQuantity:(proData)=>{
+        count=parseInt(proData.count)
+
+      cartId= new ObjectId(proData.cart)
+        proId=new  ObjectId(proData.proId)
+        return new Promise((resolve,reject)=>{
+            db.get().collection(collection.CART_COLLECTION).updateOne({"_id":cartId, "products.item":proId},
+                    {
+                        $inc:{"products.$.quantity":count}
+                    }).then(()=>{
+                        resolve()
+                    })
+          
+        })
+
+    },
+
+    removeCartProduct: (data) => {
+        const cartID = new ObjectId(data.cartId);
+        const proID = new ObjectId(data.proId);
+        return new Promise((resolve, reject) => {
+            db.get().collection(collection.CART_COLLECTION).updateOne(
+                { _id: cartID },
+                { $pull: { products: { item: proID } } }
+            ).then((result) => {
+                resolve(result); // You can pass data to resolve if needed
+            }).catch((error) => {
+                reject(error); // Reject if there's an error
+            });
+        });
+    },
+    newQuantity: (data) => {
+        const cartID = new ObjectId(data.cart);
+        const proID = new ObjectId(data.proId);
+        return new Promise(async (resolve, reject) => {
+            try {
+                console.log(cartID, proID);
+                const cart = await db.get().collection(collection.CART_COLLECTION).findOne({ _id: cartID });
+                if (cart) {
+                    console.log(cart);
+                    // Find the product within the products array with the provided proID
+                    const product = cart.products.find(product => product.item.equals(proID));
+                    if (product) {
+                        console.log(product);
+                        resolve(product.quantity);
+                    } else {
+                        console.log("Product not found in the cart.");
+                        resolve(null); // Resolve with null if the product is not found
+                    }
+                } else {
+                    console.log("No document found with the provided cartID");
+                    resolve(null); // Resolve with null if no document is found
+                }
+            } catch (error) {
+                console.error("Error occurred while finding document:", error);
+                reject(error); // Reject the promise if an error occurs
+            }
+        });
     }
+    
+    
 }
