@@ -115,18 +115,25 @@ router.post('/change-quantity',(req,res,next)=>{
   console.log(req.body);
   productHelpers.chacgeProQuantity(req.body).then((resolve)=>{
 
-  })
-  productHelpers.newQuantity(req.body).then((resolve)=>{
-    res.json(resolve)
+    productHelpers.newQuantity(req.body).then((response)=>{
+      response={
+        count:response,
+        proID:req.body.proId
+      }
+     res.json(response)
+    })
   })
 
 })
 
 router.post("/remove-cart-product",(req,res)=>{
   console.log(req.body);
-  productHelpers.removeCartProduct(req.body).then((resolve)=>{
+  
+  res.json("you wnat to delete")
 
+  productHelpers.removeCartProduct(req.body).then((resolve)=>{
   })
+  
 })
 
 

@@ -182,6 +182,7 @@ module.exports={
     newQuantity: (data) => {
         const cartID = new ObjectId(data.cart);
         const proID = new ObjectId(data.proId);
+        const count=data.count
         return new Promise(async (resolve, reject) => {
             try {
                 console.log(cartID, proID);
@@ -193,6 +194,16 @@ module.exports={
                     if (product) {
                         console.log(product);
                         resolve(product.quantity);
+                        if(product.quantity==1 && count==-1){
+                            db.get().collection(collection.CART_COLLECTION).updateOne(
+                                { _id: cartID },
+                                { $pull: { products: { item: proID } } }
+                            ).then((result) => {
+                                resolve(result); // You can pass data to resolve if needed
+                            }).catch((error) => {
+                                reject(error); // Reject if there's an error
+                            });
+                        }
                     } else {
                         console.log("Product not found in the cart.");
                         resolve(null); // Resolve with null if the product is not found

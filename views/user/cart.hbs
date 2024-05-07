@@ -21,10 +21,16 @@
         <img src="/product-images/{{this.product._id}}.jpg" width="70px" alt="">
       </th>
       <td>{{this.product.Name}}</td>
-      <td>{{this.Category}}</td>
+      <td>{{this.product.Price}}</td>
 
-      <td><button class="btn btn-primary"  onclick="changeProCount('{{this._id}}','{{this.item}}','-1'), btnManage(event)" >-</button>{{this.quantity}}<button onclick="changeProCount('{{this._id}}','{{this.item}}','1')" class="btn btn-primary">+</button></td>
-      <td><a href="" class="btn btn-danger" onclick="removeCart('{{this._id}}','{{this.product._id}}')">Remove</a></td>
+
+      <td>
+       {{#if this.quantity}}
+  <button class="btn btn-primary" id="minusBtn" onclick="changeProCount('{{_id}}','{{item}}', -1); btnManage(event)">-</button>
+{{/if}}
+
+      <span id="{{this.item}}">{{this.quantity}}</span><button onclick="changeProCount('{{this._id}}','{{this.item}}','1')" class="btn btn-primary">+</button></td>
+      <td><a href="" class="btn btn-danger" onclick=" removeCart('{{this._id}}','{{this.product._id}}')"  >Remove</a></td>
 
     </tr>
     {{/each}}
@@ -35,6 +41,8 @@
 </div>
 
 <script>
+
+
   function changeProCount(cId,pId,count){ 
     console.log(cId,pId,count)
     $.ajax({
@@ -47,7 +55,14 @@
       },
       method:"post",
       success:(response)=>{
-        alert(response)
+      
+       $("#"+response.proID).html(response.count)
+       if(response.count==1){
+        {{!-- var removeBtn=document.getElementById("minusBtn");
+removeBtn.parentNode.removeChild(removeBtn); --}}
+       }else{
+
+       }
       }
     })
 
@@ -69,6 +84,7 @@
       },
       method:"post",
       success:(response)=>{
+        
         alert(response)
       }
     })
