@@ -1,0 +1,57 @@
+<div class="container">
+   
+        <form action="" id="checkout-form">
+            <div class="row pt-5">
+
+            <div class="col-md-6">
+                <div class="form-group">
+                <label>Address</label>
+                <input type="text" name="address" class="form-control" placeholder="Enter Address">
+            </div>
+            <div class="form-group">
+                <label>Pincode</label>
+                <input type="text" name="pincode" class="form-control" placeholder="Enter pincode">
+            </div>
+            <div class="form-group">
+                <label>Mobile</label>
+                <input type="password" name="mobile" class="form-control" placeholder="Enter Mobile">
+            </div>
+                            <input type="text" name="userId" class="form-control" value="{{user}}" hidden>
+
+            </div>
+            <div class="col-md-4 pt-5">
+                <div class="container checkout">
+                    <h5>RS:{{response}}</h5>
+                    <hr>
+                    <div class="payment">
+                       <p>payment method</p>
+                       <label for="" class="radio-inline">
+                        <input type="radio" name="payment-method" value="COD">COD
+                       </label> 
+                                             
+                       <label for="">
+                        <input type="radio" name="payment-method" value="ONLINE">online payment
+                       </label>
+                       <button type="submit" class="btn btn-success">Checkout </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+           
+        </form>
+    
+</div>
+
+<script>
+    $('#checkout-form').submit((e)=>{
+        e.preventDefault()
+        $.ajax({
+            url:'/place-order',
+            method:"post",
+            data:$('#checkout-form').serialize(),
+            success:(response)=>{
+                alert(response)
+            }
+        })
+    })
+</script>

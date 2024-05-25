@@ -97,30 +97,44 @@ router.get('/logout',(req,res)=>{
 
 router.get('/cart',varifyLogin,async(req,res)=>{
   let cartProducts=await productHelpers.getCartProducts(req.session.user._id)
-  console.log(cartProducts);
+  let totalValue=await productHelpers.getTotalAmount(req.session.user._id)
   let user=req.session.user
-res.render('user/cart',{cartProducts,user})
+  if(cartProducts ){
+    res.render('user/cart',{cartProducts,user,totalValue})
+  }else{
+    res.redirect('/')
+  }
+
 })
 
 router.get('/add-to-cart/:id',(req,res)=>{
   console.log("called");
    productHelpers.addToCart(req.params.id,req.session.user._id).then(()=>{
+
      res.json({status:true})
      console.log("addddddddd");
    })
+
 
 })
 
 router.post('/change-quantity',(req,res,next)=>{
   console.log(req.body);
+  
   productHelpers.chacgeProQuantity(req.body).then((resolve)=>{
 
-    productHelpers.newQuantity(req.body).then((response)=>{
+    productHelpers.newQuantity(req.body).then(async(response)=>{
       response={
         count:response,
         proID:req.body.proId
       }
+      
+      response.total=await productHelpers.getTotalAmount(req.body.user)
+      console.log(response);
+     
      res.json(response)
+     
+  
     })
   })
 
@@ -133,7 +147,47 @@ router.post("/remove-cart-product",(req,res)=>{
 
   productHelpers.removeCartProduct(req.body).then((resolve)=>{
   })
+ 
   
+})
+
+router.get("/palce-order",varifyLogin,(req,res)=>{
+
+  productHelpers.getTotalAmount(req.session.user._id).then((response)=>{
+    console.log(response);
+    res.render("user/place-order",{response,user:req.session.user._id})
+  })
+  
+})
+
+router.post('/place-order',async(req,res)=>{
+ 
+  console.log(req.body);
+  let total=await productHelpers.getTotalAmount(req.body.userId)
+  let cart=await productHelpers.getCartProductsList(req.body.userId)
+  productHelpers.placeOrder(req.body,total,cart).then((response)=>{
+    
+    res.json({status:true})
+  })
+  console.log(req.body);
+
+
+
+  
+  console.log(total);
+})
+
+router.get('/order',varifyLogin,async(req,res)=>{
+  let orders =await productHelpers.getOrders(req.session.user._id)
+
+  console.log(orders.products);
+  res.render('user/order',{user:req.session.user,orders})
+})
+
+router.get('/view-orders-products/:id',async(req,res)=>{  
+  let products= await productHelpers.getOrderProducts(req.params.id)
+  console.log(products);
+  res.render("user/view-orders-products",{products})
 })
 
 

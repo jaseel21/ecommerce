@@ -1,9 +1,7 @@
 <div class="container">
 
 <div >
-<div class="row mt-4">
-    <a href="/admin/add-product" class="btn btn-success ml-auto">Add product</a>
-</div>
+
 <table class="table mt-5">
   <thead>
     <tr>
@@ -25,11 +23,12 @@
 
 
       <td>
-       {{#if this.quantity}}
-  <button class="btn btn-primary" id="minusBtn" onclick="changeProCount('{{_id}}','{{item}}', -1); btnManage(event)">-</button>
-{{/if}}
+     
+  <button class="btn btn-primary" id="minusBtn" onclick="changeProCount('{{this._id}}','{{this.item}}','{{../user._id}}', -1);">-</button>
 
-      <span id="{{this.item}}">{{this.quantity}}</span><button onclick="changeProCount('{{this._id}}','{{this.item}}','1')" class="btn btn-primary">+</button></td>
+
+      <span id="{{this.item}}">{{this.quantity}}</span>
+      <button onclick="changeProCount('{{this._id}}','{{this.item}}','{{../user._id}}','1')" class="btn btn-primary">+</button></td>
       <td><a href="" class="btn btn-danger" onclick=" removeCart('{{this._id}}','{{this.product._id}}')"  >Remove</a></td>
 
     </tr>
@@ -37,18 +36,28 @@
     
   </tbody>
 </table>
+<hr>
+<div class="float-right ">
+  <h2>Rs: <span id="total">
+    {{#if totalValue}}
+    {{totalValue}}
+    {{/if}}</span></h2>
+  <a href="/palce-order" class="btn btn-success" style="width: 100%;">Place order</a>
+
+</div>
 </div>
 </div>
 
 <script>
 
 
-  function changeProCount(cId,pId,count){ 
-    console.log(cId,pId,count)
+  function changeProCount(cId,pId,uId,count){ 
+    console.log(cId,pId,uId,count)
     $.ajax({
       
       url:"/change-quantity",
       data:{
+        user:uId,
         cart:cId,
         proId:pId,
         count:count
@@ -57,22 +66,26 @@
       success:(response)=>{
       
        $("#"+response.proID).html(response.count)
-       if(response.count==1){
-        {{!-- var removeBtn=document.getElementById("minusBtn");
-removeBtn.parentNode.removeChild(removeBtn); --}}
-       }else{
+      if(response.count==0){
+        alert("product going to delete")
+        window.location.href = "/cart"; 
+      
+      
+      }else{
+        document.getElementById('total').innerHTML=response.total
+      }
+       //if(response.count==1){
+       // var removeBtn=document.getElementById("minusBtn");
+       // removeBtn.parentNode.removeChild(removeBtn);
+      // }else{
 
-       }
+      // }
       }
     })
 
   }
 
-  function btnManage(e){
 
-
-
-  }
 
   function removeCart(cartID,proID){
     
