@@ -349,7 +349,7 @@ module.exports={
 
             db.get().collection(collection.ORDER_COLLECTION).insertOne(OrderObj).then((response)=>{
 
-                resolve()
+                resolve(response.insertedId)
                 db.get().collection(collection.CART_COLLECTION).deleteOne({userId:uid})
             })
         })

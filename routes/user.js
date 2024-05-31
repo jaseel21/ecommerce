@@ -115,7 +115,6 @@ router.get('/add-to-cart/:id',(req,res)=>{
      console.log("addddddddd");
    })
 
-
 })
 
 router.post('/change-quantity',(req,res,next)=>{
@@ -155,7 +154,7 @@ router.get("/palce-order",varifyLogin,(req,res)=>{
 
   productHelpers.getTotalAmount(req.session.user._id).then((response)=>{
     console.log(response);
-    res.render("user/place-order",{response,user:req.session.user._id})
+    res.render("user/place-order",{response,user:req.session.user})
   })
   
 })
@@ -165,16 +164,25 @@ router.post('/place-order',async(req,res)=>{
   console.log(req.body);
   let total=await productHelpers.getTotalAmount(req.body.userId)
   let cart=await productHelpers.getCartProductsList(req.body.userId)
-  productHelpers.placeOrder(req.body,total,cart).then((response)=>{
+  productHelpers.placeOrder(req.body,total,cart).then((orderID)=>{
+    console.log(req.body);
     
-    res.json({status:true})
+    if(req.body['payment-method']=='COD'){
+      res.json({codSuccuss:true})
+    }else{
+      userHelpers.razorpayOrderCreate(orderID,total).then((response)=>{
+        res.json({response})
+        
+      })
+    }
   })
-  console.log(req.body);
-
-
+  router.post('/verify-payment',(req,res)=>{
+    console.log(req.body);
+    console.log('verifyPayment');
+  })
 
   
-  console.log(total);
+
 })
 
 router.get('/order',varifyLogin,async(req,res)=>{
@@ -189,6 +197,8 @@ router.get('/view-orders-products/:id',async(req,res)=>{
   console.log(products);
   res.render("user/view-orders-products",{products})
 })
-
+router.get('/order-success',(req,res)=>{
+  res.render('user/order-success')
+})
 
 module.exports = router;

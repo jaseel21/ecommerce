@@ -1,6 +1,11 @@
 const db=require('../config/connection')
 const collection=require('../config/collection')
 const bcrypt=require('bcrypt')
+const Razorpay=require('razorpay')
+var instance = new Razorpay({
+    key_id: 'rzp_test_HTLtd98iebJmUj',
+    key_secret: 'XfsmUH3gxM0wW18e6pWv0IP8',
+  });
 
 
 
@@ -45,5 +50,20 @@ module.exports={
             })
            
         })
+    },
+    razorpayOrderCreate:(orderID,total)=>{
+        return new Promise((resolve,reject)=>{
+
+            var options={
+                amount:total,
+                currency:"INR",
+                receipt:orderID
+            };
+            instance.orders.create(options, function(err ,order){
+               console.log(order);
+                resolve(order)
+            })
+        })
+
     }
 }

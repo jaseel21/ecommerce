@@ -16,7 +16,7 @@
                 <label>Mobile</label>
                 <input type="password" name="mobile" class="form-control" placeholder="Enter Mobile">
             </div>
-                            <input type="text" name="userId" class="form-control" value="{{user}}" hidden>
+                            <input type="text" name="userId" class="form-control" value="{{user._id}}" hidden>
 
             </div>
             <div class="col-md-4 pt-5">
@@ -42,7 +42,99 @@
     
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery library -->
+
 <script>
+    $(document).ready(function() {
+        $('#checkout-form').submit(function(e) {
+            e.preventDefault(); // Prevent the default form submission
+            
+            // Serialize form data
+            var formData = $(this).serialize();
+            
+            // AJAX request
+            $.ajax({
+                url: '/place-order',
+                method: 'post',
+                data: formData,
+                success: function(response) {
+                    if (response.codSuccuss) {
+                        // Redirect to order success page
+                        window.location.href = "/order-success";
+                    } else {
+                        // Call Razorpay payment function
+                        razorpayPayment(response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors here
+                    console.error(error);
+                }
+            });
+        });
+
+        function razorpayPayment(order) {
+            console.log('ooooooorfrt    ',order)
+
+             var options = {
+    "key": "rzp_test_HTLtd98iebJmUj", // Enter the Key ID generated from the Dashboard
+    "amount": 100000, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "jaseel", //your business name
+    "description": "Test Transaction",
+    "image": "https://example.com/your_logo",
+    "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+     "handler": function (response){
+        try {
+            console.log("Handler response:", response);
+            alert(response.razorpay_payment_id);
+            alert(response.razorpay_order_id);
+            alert(response.razorpay_signature);
+            verifyPayment(response, order);
+        } catch (error) {
+            console.error("Error in handler:", error);
+            alert(error)
+            // You can handle the error here, e.g., show an error message to the user
+        }
+    },
+    "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
+        "name": "jaseel", //your customer's name
+        "email": "thashfeqq123@gmail.com", 
+        "contact": "9000090000"  //Provide the customer's phone number for better conversion rates 
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+};
+
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+        }
+
+        function verifyPayment(payment, order) {
+            $.ajax({
+                url: '/verify-payment',
+                data: {
+                    payment: payment,
+                    order: order
+                },
+                method: 'post',
+                success: function(response) {
+                    // Handle success response
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors here0
+                    console.error(error);
+                }
+            });
+        }
+    });
+</script>
+
+{{!-- <script>
     $('#checkout-form').submit((e)=>{
         e.preventDefault()
         $.ajax({
@@ -50,8 +142,59 @@
             method:"post",
             data:$('#checkout-form').serialize(),
             success:(response)=>{
-                alert(response)
+                if(response.codSuccess){
+
+              location.href="/order-success"
+                }else{
+                    razorpayPayment(response)
+                    console.log(response)
+                    console.log('online method true')
+                }
             }
         })
     })
-</script>
+
+    function razorpayPayment(order){
+  var options = {
+    "key": "rzp_test_HTLtd98iebJmUj", // Enter the Key ID generated from the Dashboard
+    "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "jaseel", //your business name
+    "description": "Test Transaction",
+    "image": "https://example.com/your_logo",
+    "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+    "handler": function (response){
+        alert(response.razorpay_payment_id);
+        alert(response.razorpay_order_id);
+        alert(response.razorpay_signature)
+
+        verifyPayment(response,order)
+    },
+    "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
+        "name": "Gaurav Kumar", //your customer's name
+        "email": "gaurav.kumar@example.com", 
+        "contact": "9000090000"  //Provide the customer's phone number for better conversion rates 
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+};
+
+function verifyPayment(payment,order){
+    $.ajax({
+        url:'/verify-payment',
+        data:{
+            payment,
+            order
+
+        },
+        method:'post'
+    })
+}
+
+var rzp1 = new Razorpay(options);
+    rzp1.open();
+</script> --}}
