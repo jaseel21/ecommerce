@@ -132,7 +132,6 @@ router.post('/change-quantity',(req,res,next)=>{
       console.log(response);
      
      res.json(response)
-     
   
     })
   })
@@ -171,15 +170,22 @@ router.post('/place-order',async(req,res)=>{
       res.json({codSuccuss:true})
     }else{
       userHelpers.razorpayOrderCreate(orderID,total).then((response)=>{
+        console.log('dataa',response);
         res.json({response})
         
       })
     }
   })
   router.post('/verify-payment',(req,res)=>{
+    console.log('call v-payment');
+  
     console.log(req.body);
-    console.log('verifyPayment');
+   userHelpers.verifyPayment(req.body).then((response)=>{
+    res.json({payment:true})
+  }).catch((err)=>{
+    res.json({payment:false})
   })
+   })
 
   
 

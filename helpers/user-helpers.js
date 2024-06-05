@@ -2,11 +2,8 @@ const db=require('../config/connection')
 const collection=require('../config/collection')
 const bcrypt=require('bcrypt')
 const Razorpay=require('razorpay')
-var instance = new Razorpay({
-    key_id: 'rzp_test_HTLtd98iebJmUj',
-    key_secret: 'XfsmUH3gxM0wW18e6pWv0IP8',
-  });
 
+  var instance = new Razorpay({ key_id: 'rzp_test_HTLtd98iebJmUj', key_secret: 'XfsmUH3gxM0wW18e6pWv0IP8' })
 
 
 module.exports={
@@ -63,7 +60,26 @@ module.exports={
                console.log(order);
                 resolve(order)
             })
+
+            
         })
 
+        
+
+    },
+    verifyPayment:(details)=>{
+        const crypto = require('crypto');
+        return new Promise((resolve, reject) => {
+            const hmac = crypto.createHmac('sha256', 'XfsmUH3gxM0wW18e6pWv0IP8');
+            
+            hmac.update(details['payment[razorpay_order_id]'] + "|" + details['payment[razorpay_payment_id]']);
+            const signature = hmac.digest('hex');
+    
+            if (signature === details["payment[razorpay_signature]"]) {
+                resolve();
+            } else {
+                reject(new Error('Signature mismatch. Payment verification failed.'));
+            }
+        });
     }
 }
