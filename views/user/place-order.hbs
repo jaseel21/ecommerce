@@ -100,13 +100,7 @@
     },
      "handler": function (response) {
             // This function will be called when the payment is successful
-            var payment_id = response.razorpay_payment_id;
-            var order_id = response.razorpay_order_id;
-            var signature = response.razorpay_signature;
-            alert(response.razorpay_payment_id)
-            alert(response.razorpay_order_id)
-            alert(response.razorpay_signature)
-
+           
             // Send this information to your server for further processing
             verifyPayment(response,order);
         }
@@ -130,6 +124,7 @@
                     if(response.payment){
 
                    alert('payment succussful')
+                   location.href="/order-success"
                     }else{
   alert('payment failed')
                     }

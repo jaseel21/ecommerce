@@ -2,6 +2,7 @@ const db=require('../config/connection')
 const collection=require('../config/collection')
 const bcrypt=require('bcrypt')
 const Razorpay=require('razorpay')
+const { ObjectId } = require('mongodb')
 
   var instance = new Razorpay({ key_id: 'rzp_test_HTLtd98iebJmUj', key_secret: 'XfsmUH3gxM0wW18e6pWv0IP8' })
 
@@ -52,7 +53,7 @@ module.exports={
         return new Promise((resolve,reject)=>{
 
             var options={
-                amount:total,
+                amount:total*100,
                 currency:"INR",
                 receipt:orderID
             };
@@ -81,5 +82,18 @@ module.exports={
                 reject(new Error('Signature mismatch. Payment verification failed.'));
             }
         });
+    },
+    changeProStatus:(orderId)=>{
+        const Oid=new ObjectId(orderId)
+        return new Promise((resolve,reject)=>{
+            db.get().collection(collection.ORDER_COLLECTION).updateOne({_id:Oid},{
+                $set:{
+                    status:"placed"
+                }
+            }).then((response)=>{
+                resolve({status:true})
+                console.log(response,'change ststus');
+            })
+        })
     }
 }

@@ -367,7 +367,7 @@ module.exports={
             
             resolve(orders);
         })
-    }
+    },
     
     
 }

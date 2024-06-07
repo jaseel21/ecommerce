@@ -2,6 +2,7 @@ var express = require('express');
 const { route } = require('./user');
 var router = express.Router();
 const productHelpers=require("../helpers/product-helpers")
+const adminHelpers=require('../helpers/admin-helpers')
 
 
 /* GET users listing. */
@@ -58,6 +59,28 @@ router.post('/edit-product/:id',((req,res)=>{
     image=req.files.Image
     image.mv('./public/product-images/'+req.params.id+".jpg")
   }
+
 }))
 
+router.get('/view-palced-orders',(req,res)=>{
+  console.log('admin called');
+  adminHelpers.getPlacedOrders().then((placedPro)=>{
+   res.render('admin/admin-orders',{placedPro})
+  })
+})
+
+router.get('/status-change-toship/:id',(req,res)=>{
+  adminHelpers.statusChangeToship(req.params.id).then(()=>{
+    res.redirect('/view-orders')
+  })
+})
+
+router.get("/view-shipped-orders",(req,res)=>{
+  
+  adminHelpers.getShippedOrders().then((shipOrders)=>{
+    console.log('callled shipppeeee');
+    console.log(shipOrders);
+    res.render('admin/view-shipped-orders',{shipOrders})
+  })
+})
 module.exports = router;
